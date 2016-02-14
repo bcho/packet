@@ -36,14 +36,14 @@ var (
 	ErrPacketTooLarge = fmt.Errorf("packet too large")
 )
 
-type packetParser struct {
+type PacketParser struct {
 	packetLenFieldSize PacketLenFieldSize
 	packetMaxLen       uint32
 	littleEndian       bool
 }
 
-func NewParser(packetLenFieldSize PacketLenFieldSize, littleEndian bool) packetParser {
-	p := packetParser{
+func NewParser(packetLenFieldSize PacketLenFieldSize, littleEndian bool) PacketParser {
+	p := PacketParser{
 		packetLenFieldSize: packetLenFieldSize,
 		littleEndian:       littleEndian,
 	}
@@ -62,7 +62,7 @@ func NewParser(packetLenFieldSize PacketLenFieldSize, littleEndian bool) packetP
 	return p
 }
 
-func (p packetParser) Read(reader io.Reader) ([]byte, error) {
+func (p PacketParser) Read(reader io.Reader) ([]byte, error) {
 	packetLenBuffer := make([]byte, p.packetLenFieldSize)
 	if _, err := io.ReadFull(reader, packetLenBuffer); err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func (p packetParser) Read(reader io.Reader) ([]byte, error) {
 	return packetData, nil
 }
 
-func (p packetParser) Write(writer io.Writer, data []byte) error {
+func (p PacketParser) Write(writer io.Writer, data []byte) error {
 	packetLen := uint32(len(data))
 	if packetLen > p.packetMaxLen {
 		return ErrPacketTooLarge
