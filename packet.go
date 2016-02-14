@@ -100,7 +100,8 @@ func (p PacketParser) Read(reader io.Reader) ([]byte, error) {
 
 func (p PacketParser) Write(writer io.Writer, data []byte) error {
 	packetLen := uint32(len(data))
-	if packetLen > p.packetMaxLen {
+	overflow := len(data) != int(packetLen) // FIXME use more robust mean
+	if packetLen > p.packetMaxLen || overflow {
 		return ErrPacketTooLarge
 	}
 
