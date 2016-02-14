@@ -7,7 +7,7 @@ Read & write binary packet with length.
 
 ## History
 
-This package basic on [Leaf][]'s `tcp_msg` module.
+This package is based on [Leaf][]'s `tcp_msg` module.
 
 [Leaf]: https://github.com/name5566/leaf/blob/47f1a7cc53fb761dd9d3b125f40c682fbcf8f158/network/tcp_msg.go
 
