@@ -61,3 +61,37 @@ func TestReadLargePacket(t *testing.T) {
 		t.Errorf("expected error `ErrPacketTooLarge`: %v", err)
 	}
 }
+
+func benchmarkParser(b *testing.B, parser PacketParser) {
+	var buf bytes.Buffer
+	data := []byte("hello")
+
+	for i := 0; i < b.N; i++ {
+		parser.Write(&buf, data)
+		parser.Read(&buf)
+	}
+}
+
+func BenchmarkOneByteLittleEndian(b *testing.B) {
+	benchmarkParser(b, OneByteLittleEndian)
+}
+
+func BenchmarkOneByteBigEndian(b *testing.B) {
+	benchmarkParser(b, OneByteBigEndian)
+}
+
+func BenchmarkTwoBytesLittleEndian(b *testing.B) {
+	benchmarkParser(b, TwoBytesLittleEndian)
+}
+
+func BenchmarkTwoBytesBigEndian(b *testing.B) {
+	benchmarkParser(b, TwoBytesBigEndian)
+}
+
+func BenchmarkFourBytesLittleEndian(b *testing.B) {
+	benchmarkParser(b, FourBytesLittleEndian)
+}
+
+func BenchmarkFourBytesBigEndian(b *testing.B) {
+	benchmarkParser(b, FourBytesBigEndian)
+}
