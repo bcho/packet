@@ -1,4 +1,6 @@
-// Packet with length:
+// Packet packet helps create packet with length.
+//
+// Packet structure:
 //
 //      --------------
 //      | len | data |
@@ -16,32 +18,36 @@ package packet
 
 import (
 	"encoding/binary"
-	"fmt"
+	"errors"
 	"io"
 	"math"
 )
 
+// Packet length field size.
 type PacketLenFieldSize uint32
 
 const (
-	OneByte   = PacketLenFieldSize(1)
-	TwoBytes  = PacketLenFieldSize(2)
-	FourBytes = PacketLenFieldSize(4)
+	OneByte   = PacketLenFieldSize(1) // use 8 bites for length field
+	TwoBytes  = PacketLenFieldSize(2) // use 16 bits for length field
+	FourBytes = PacketLenFieldSize(4) // use 32 bits for length field
 
-	LittleEndian = true
-	BigEndian    = false
+	LittleEndian = true  // use little endian
+	BigEndian    = false // use big endian
 )
 
 var (
-	ErrPacketTooLarge = fmt.Errorf("packet too large")
+	// ErrPacketTooLarge will be used when packet data too large.
+	ErrPacketTooLarge = errors.New("packet too large")
 )
 
+// A PacketParser is used for parsing or building a packet.
 type PacketParser struct {
 	packetLenFieldSize PacketLenFieldSize
 	packetMaxLen       uint32
 	littleEndian       bool
 }
 
+// Instance a new packet parser.
 func NewParser(packetLenFieldSize PacketLenFieldSize, littleEndian bool) PacketParser {
 	p := PacketParser{
 		packetLenFieldSize: packetLenFieldSize,
@@ -62,6 +68,8 @@ func NewParser(packetLenFieldSize PacketLenFieldSize, littleEndian bool) PacketP
 	return p
 }
 
+// Read reads a packet from reader. Any error encountered during the read will be returned.
+// If packet is too large, ErrPacketTooLarge will be returned.
 func (p PacketParser) Read(reader io.Reader) ([]byte, error) {
 	packetLenBuffer := make([]byte, p.packetLenFieldSize)
 	if _, err := io.ReadFull(reader, packetLenBuffer); err != nil {
@@ -98,6 +106,8 @@ func (p PacketParser) Read(reader io.Reader) ([]byte, error) {
 	return packetData, nil
 }
 
+// Write writes a packet data with length to writer. Any error encountered during the write will be returned.
+// If packet data is too large, ErrPacketTooLarge will be returned.
 func (p PacketParser) Write(writer io.Writer, data []byte) error {
 	packetLen := uint32(len(data))
 	overflow := len(data) != int(packetLen) // FIXME use more robust mean
@@ -129,10 +139,10 @@ func (p PacketParser) Write(writer io.Writer, data []byte) error {
 }
 
 var (
-	OneByteLittleEndian   = NewParser(OneByte, LittleEndian)
-	OneByteBigEndian      = NewParser(OneByte, BigEndian)
-	TwoBytesLittleEndian  = NewParser(TwoBytes, LittleEndian)
-	TwoBytesBigEndian     = NewParser(TwoBytes, BigEndian)
-	FourBytesLittleEndian = NewParser(FourBytes, LittleEndian)
-	FourBytesBigEndian    = NewParser(FourBytes, BigEndian)
+	OneByteLittleEndian   = NewParser(OneByte, LittleEndian)   // 8 bits length (0 ~ 255), little endian
+	OneByteBigEndian      = NewParser(OneByte, BigEndian)      // 8 bits length (0 ~ 255), big endian
+	TwoBytesLittleEndian  = NewParser(TwoBytes, LittleEndian)  // 16 bits length (0 ~ 65535), little endian
+	TwoBytesBigEndian     = NewParser(TwoBytes, BigEndian)     // 16 bits length (0 ~ 65535), big endian
+	FourBytesLittleEndian = NewParser(FourBytes, LittleEndian) // 32 bits length (0 ~ 4294967295), little endian
+	FourBytesBigEndian    = NewParser(FourBytes, BigEndian)    // 32 bits length (0 ~ 4294967295), big endian
 )
