@@ -104,3 +104,32 @@ func WritePacket(writer io.Writer, data []byte, littleEndian bool, packetLenFiel
 		maxLenOfPacket(packetLenFieldSize),
 	)
 }
+
+// Writer is used for reading packets.
+type Writer struct {
+	packetLenFieldSize PacketLenFieldSize
+	packetMaxLen       uint32
+	littleEndian       bool
+
+	w io.Writer
+}
+
+// NewWriter creates a new Writer writing to w with giving settings.
+func NewWriter(w io.Writer, packetLenFieldSize PacketLenFieldSize, littleEndian bool) *Writer {
+	return &Writer{
+		packetLenFieldSize: packetLenFieldSize,
+		packetMaxLen:       maxLenOfPacket(packetLenFieldSize),
+		littleEndian:       littleEndian,
+		w:                  w,
+	}
+}
+
+func (w Writer) Write(b []byte) (int, error) {
+	return writePacket(
+		w.w,
+		b,
+		w.littleEndian,
+		w.packetLenFieldSize,
+		w.packetMaxLen,
+	)
+}

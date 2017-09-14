@@ -1,9 +1,6 @@
 package packet
 
-import (
-	"io"
-	"math"
-)
+import "io"
 
 // A PacketParser is used for parsing or building a packet.
 type PacketParser struct {
@@ -14,23 +11,11 @@ type PacketParser struct {
 
 // Instance a new packet parser.
 func NewParser(packetLenFieldSize PacketLenFieldSize, littleEndian bool) PacketParser {
-	p := PacketParser{
+	return PacketParser{
 		packetLenFieldSize: packetLenFieldSize,
+		packetMaxLen:       maxLenOfPacket(packetLenFieldSize),
 		littleEndian:       littleEndian,
 	}
-
-	switch packetLenFieldSize {
-	case OneByte:
-		p.packetMaxLen = math.MaxUint8
-	case TwoBytes:
-		p.packetMaxLen = math.MaxUint16
-	case FourBytes:
-		p.packetMaxLen = math.MaxUint32
-	default:
-		p.packetMaxLen = math.MaxUint32
-	}
-
-	return p
 }
 
 // Read reads a packet from reader. Any error encountered during the read will be returned.
