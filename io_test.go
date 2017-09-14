@@ -22,10 +22,12 @@ func testWriter(t *testing.T, packetLenFieldSize PacketLenFieldSize, littleEndia
 	}
 
 	// write large packet data
-	largeData := make([]byte, uint64(maxPacket)+1)
-	_, err = writer.Write(largeData)
-	if err != ErrPacketTooLarge {
-		t.Errorf("expected error `ErrPacketTooLarge`: %v", err)
+	if !inTravis() {
+		largeData := make([]byte, uint64(maxPacket)+1)
+		_, err = writer.Write(largeData)
+		if err != ErrPacketTooLarge {
+			t.Errorf("expected error `ErrPacketTooLarge`: %v", err)
+		}
 	}
 }
 
